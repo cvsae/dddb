@@ -1,0 +1,11 @@
+{
+	"name": "dddb",
+	"targetType": "library",
+	"authors": [
+		"cvsae"
+	],
+	"dependencies": {},
+	"description": "Dddb lightweight and simple key-value store ",
+	"copyright": "Copyright © 2018, cvsae",
+	"license": "MIT"
+}
