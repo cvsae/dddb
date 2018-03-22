@@ -78,20 +78,3 @@ class ddb{
 		return(j.object.keys);
 	}
 }
-
-
-
-void main() {
-	auto db = new ddb("tres.db");
-	db.set("facebook", "fb");
-	db.set("instagram", "insta");
-	db.set("whatsapp", "stspp");
-
-	assert(db.get("facebook") == "fb");
-	assert(db.get("instagram") == "insta");
-	assert(db.get("whatsapp") == "stspp");
-
-	db.update("facebook", "fatsabook");
-	writeln(db.get("facebook"));
-	writeln(db.getkeys());
-}
