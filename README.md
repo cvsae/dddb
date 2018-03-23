@@ -12,7 +12,7 @@ import dddb;
 
 void main() {
 
-	auto db = new ddb("social.db");
+	auto db = new ddb("test.db");
 
         // set facebook value to fb 
 	db.set("facebook", "fb");
@@ -35,4 +35,9 @@ void main() {
 
         // db.getkeys() return a list of all keys 
 	writeln(db.getkeys()); 
+	
+	// db.countkeys() return the lenght of databae keys
+	assert(db.coutkeys()) == 2);
+	writeln(db.countkeys()); // 2
+	
 }
