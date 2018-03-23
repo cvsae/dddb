@@ -9,7 +9,6 @@ import std.file;
 import std.json;
 
 
-
 class ddb{
 
 
@@ -31,13 +30,11 @@ class ddb{
 	}
 
 
-
 	void load(){
 		// load db contents
 		File file = File(db, "r");
 	    dbdata = file.readln(); 
 	}
-
 
 
 
@@ -54,27 +51,59 @@ class ddb{
 	string get(string key){
 		// return the value of specifiec key
 		JSONValue j = parseJSON(dbdata);
-		return(j[key].str);
+
+		if(have(key)){
+			return(j[key].str);
+		} 
+		else{
+			throw new Exception("Error: key not exists");
+		}			
 	}
 
 	void set(string key, string value){
 		// set value to specifiec key
         JSONValue j = parseJSON(dbdata);
-	    j.object[key] = value;
-	    save(j);
+        if(!have(key)){
+        	j.object[key] = value;
+        	save(j);
+        }
+        else{
+        	throw new Exception("Error: key already exists");
+        }
 	}
 
 	
 	void update(string key, string value){
 		// update an already existed key value with new value
 		JSONValue j = parseJSON(dbdata);
-		j[key].str = value;
-		save(j);
+
+		if(have(key)){
+			j[key].str = value;
+			save(j);
+		}
+		else{
+			throw new Exception("Error: Unable to update key wich not already exists");
+		}	
 	}
 
 	string[] getkeys(){
 		// get keys 
 		JSONValue j = parseJSON(dbdata);
 		return(j.object.keys);
+	}
+
+
+	int countkeys(){
+		// return the lenght of databae keys
+		JSONValue j = parseJSON(dbdata);
+		return to!int(j.object.keys.length);
+
+	}
+
+
+	bool have(string key){
+		// return true if key exists false if not
+		JSONValue j = parseJSON(dbdata);
+		return((key in j) != null);
 	}
 }
