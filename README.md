@@ -39,7 +39,11 @@ void main() {
 	writeln(db.getkeys()); 
 	
 	// db.countkeys() return the lenght of databae keys
-	assert(db.coutkeys()) == 2);
+	assert(db.countkeys() == 2);
 	writeln(db.countkeys()); // 2
+	
+	assert(db.getsize() == 38);
+	// db.getsize() return the database size in bytes
+	writeln(db.getsize()); // 38
 	
 }
