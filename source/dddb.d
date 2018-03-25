@@ -102,7 +102,11 @@ class ddb{
 	
 	int getsize(){
 		// return database size in bytes
-		return to!int(getSize(db));
+		if(exists(db)){
+			return to!int(getSize(db));
+		} else{
+			throw new Exception("Error: Unable to get database size, database not exists");
+		}
 	}
 
 
