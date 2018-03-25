@@ -99,6 +99,11 @@ class ddb{
 		return to!int(j.object.keys.length);
 
 	}
+	
+	int getsize(){
+		// return database size in bytes
+		return to!int(getSize(db));
+	}
 
 
 	bool have(string key){
