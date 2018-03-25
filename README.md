@@ -1,5 +1,7 @@
 # dddb
- Dddb lightweight and simple key-value store using std.json 
+[![Build Status](https://travis-ci.org/cvsae/dddb.svg?branch=master)](https://travis-ci.org/cvsae/dddb)
+
+ dddb is lightweight and simple key-value dlang database (store) build on top of std.json 
 
 ## Usage
 
