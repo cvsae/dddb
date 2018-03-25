@@ -108,6 +108,15 @@ class ddb{
 			throw new Exception("Error: Unable to get database size, database not exists");
 		}
 	}
+	
+	void drop(){
+		// Drop database
+		if(exists(db)){
+			remove(db);
+		} else{
+			throw new Exception("Error: Unable to drop a non-existed database");
+		}
+	}
 
 
 	bool have(string key){
