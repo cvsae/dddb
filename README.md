@@ -46,4 +46,10 @@ void main() {
 	// db.getsize() return the database size in bytes
 	writeln(db.getsize()); // 38
 	
+	// db.drop() delete database 
+	// NOTE: all db data will be lost
+	db.drop();
+	assert(exists(db.db) == false);
+	
+	
 }
