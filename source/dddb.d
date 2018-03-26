@@ -51,13 +51,44 @@ class ddb{
 	string get(string key){
 		// return the value of specifiec key
 		JSONValue j = parseJSON(dbdata);
+        
 
 		if(have(key)){
-			return(j[key].str);
+			if(j[key].type == JSON_TYPE.ARRAY) {
+			    /* case key has more than 1 value
+			       return the first value
+			    */
+				return(j[key][0].str);	
+			} else {
+				/* case key has 1 value
+				   return its value
+				*/
+				return(j[key].str);
+			}	
 		} 
 		else{
 			throw new Exception("Error: key not exists");
 		}			
+	}
+
+	string getall(string key){
+		// get all values of key
+		JSONValue j = parseJSON(dbdata);
+
+		if(have(key)){
+			if(j[key].type == JSON_TYPE.ARRAY) {
+				// case is array, return an array of values
+				return to!string((j[key].array));
+				} 
+			else{
+                // case not array, return their value
+				return get(key);
+				}
+		} 
+		else{
+			throw new Exception("Error: key not exists");
+		}	
+
 	}
 
 	void set(string key, string value){
@@ -84,6 +115,27 @@ class ddb{
 		else{
 			throw new Exception("Error: Unable to update key wich not already exists");
 		}	
+	}
+
+	void append(string key, string value){
+
+		JSONValue j = parseJSON(dbdata);
+
+		string thisValue;
+
+		if(have(key)){
+			if(j[key].type == JSON_TYPE.ARRAY) {
+				thisValue = to!string(j[key].array);
+			}else{
+				thisValue = j[key].str;
+			}
+
+			j.object[key] = JSONValue([thisValue, value]);
+			save(j);
+
+		} else{
+			throw new Exception("Error: Unable to append to key wich not already exists");
+		}
 	}
 
 	string[] getkeys(){
