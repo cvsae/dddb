@@ -118,21 +118,16 @@ class ddb{
 	}
 
 	void append(string key, string value){
-
+        
 		JSONValue j = parseJSON(dbdata);
-
-		string thisValue;
-
 		if(have(key)){
 			if(j[key].type == JSON_TYPE.ARRAY) {
-				thisValue = to!string(j[key].array);
+			    JSONValue([j[key].array ~= JSONValue(value)]);
+				save(j);
 			}else{
-				thisValue = j[key].str;
+				j.object[key] = JSONValue([j[key].str, value]);
+				save(j);	
 			}
-
-			j.object[key] = JSONValue([thisValue, value]);
-			save(j);
-
 		} else{
 			throw new Exception("Error: Unable to append to key wich not already exists");
 		}
