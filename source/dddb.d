@@ -2,7 +2,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-
 import std.conv : to;
 import std.stdio;
 import std.file;
@@ -53,12 +52,19 @@ class ddb{
 		JSONValue j = parseJSON(dbdata);
 
 		if(have(key)){
-			return(j[key].str);
+			if(j[key].type == JSON_TYPE.ARRAY) {
+			   // case is array, return an array of values
+				return to!string((j[key].array));
+			}else{
+				return j[key].str;
+			}
 		} 
 		else{
 			throw new Exception("Error: key not exists");
 		}			
 	}
+
+
 
 	void set(string key, string value){
 		// set value to specifiec key
@@ -72,14 +78,54 @@ class ddb{
         }
 	}
 
+	void append(string key, string value){
+        
+		JSONValue j = parseJSON(dbdata);
+		if(have(key)){
+			if(j[key].type == JSON_TYPE.ARRAY) {
+			    JSONValue([j[key].array ~= JSONValue(value)]);
+				save(j);
+			}else{
+				j.object[key] = JSONValue([j[key].str, value]);
+				save(j);	
+			}
+		} else{
+			throw new Exception("Error: Unable to append to key wich not already exists");
+		}
+	}
+
 	
-	void update(string key, string value){
+	void update(string key, string value, string newvalue = ""){
 		// update an already existed key value with new value
 		JSONValue j = parseJSON(dbdata);
 
+		bool VAalueExists;
+		int line = 0;
+
 		if(have(key)){
-			j[key].str = value;
-			save(j);
+			// case json array 
+			if(j[key].type == JSON_TYPE.ARRAY) {
+				foreach(Key; j[key].array)
+				{   
+					if (Key.str == value){
+						VAalueExists = true;
+						break;
+					}
+
+					line ++;
+				}
+
+				if(VAalueExists){
+					j[key][line].str = newvalue;
+					save(j);
+				}
+			    else{
+					throw new Exception("Error: Unable to update value wich not exists");
+				}
+			}else{
+				j[key].str = value;
+				save(j);
+			}			
 		}
 		else{
 			throw new Exception("Error: Unable to update key wich not already exists");
