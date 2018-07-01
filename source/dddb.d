@@ -104,13 +104,37 @@ class ddb{
 	}
 
 	
-	void update(string key, string value){
+	void update(string key, string value, string newvalue = ""){
 		// update an already existed key value with new value
 		JSONValue j = parseJSON(dbdata);
 
+		bool VAalueExists;
+		int line = 0;
+
 		if(have(key)){
-			j[key].str = value;
-			save(j);
+			// case json array 
+			if(j[key].type == JSON_TYPE.ARRAY) {
+				foreach(Key; j[key].array)
+				{   
+					if (Key.str == value){
+						VAalueExists = true;
+						break;
+					}
+
+					line ++;
+				}
+
+				if(VAalueExists){
+					j[key][line].str = newvalue;
+					save(j);
+				}
+			    else{
+					throw new Exception("Error: Unable to update value wich not exists");
+				}
+			}else{
+				j[key].str = value;
+				save(j);
+			}			
 		}
 		else{
 			throw new Exception("Error: Unable to update key wich not already exists");
