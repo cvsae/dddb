@@ -29,6 +29,7 @@ class ddb{
 	}
 
 
+
 	void load(){
 		// load db contents
 		File file = File(db, "r");
@@ -51,7 +52,7 @@ class ddb{
 		// return the value of specifiec key
 		JSONValue j = parseJSON(dbdata);
 
-		if(have(key)){
+		if(havekey(key)){
 			if(j[key].type == JSON_TYPE.ARRAY) {
 			   // case is array, return an array of values
 				return to!string((j[key].array));
@@ -69,32 +70,32 @@ class ddb{
 	void set(string key, string value){
 		// set value to specifiec key
         JSONValue j = parseJSON(dbdata);
-        if(!have(key)){
+
+        if(!havekey(key)){
+        	// case key not exists
         	j.object[key] = value;
         	save(j);
-        }
-        else{
-        	throw new Exception("Error: key already exists");
-        }
-	}
+        }else{
 
-	void append(string key, string value){
-        
-		JSONValue j = parseJSON(dbdata);
-		if(have(key)){
-			if(j[key].type == JSON_TYPE.ARRAY) {
+        	if(j[key].type == JSON_TYPE.ARRAY) {
+        		// check if already exists 
+        		foreach(Key; j[key].array){
+        			if(Key.str == value){
+        				throw new Exception("Error: value already exists exists");
+        			}
+        		}
+
 			    JSONValue([j[key].array ~= JSONValue(value)]);
 				save(j);
 			}else{
 				j.object[key] = JSONValue([j[key].str, value]);
 				save(j);	
 			}
-		} else{
-			throw new Exception("Error: Unable to append to key wich not already exists");
-		}
+        }
 	}
 
-	
+
+
 	void update(string key, string value, string newvalue = ""){
 		// update an already existed key value with new value
 		JSONValue j = parseJSON(dbdata);
@@ -102,7 +103,7 @@ class ddb{
 		bool VAalueExists;
 		int line = 0;
 
-		if(have(key)){
+		if(havekey(key)){
 			// case json array 
 			if(j[key].type == JSON_TYPE.ARRAY) {
 				foreach(Key; j[key].array)
@@ -132,6 +133,8 @@ class ddb{
 		}	
 	}
 
+
+
 	string[] getkeys(){
 		// get keys 
 		JSONValue j = parseJSON(dbdata);
@@ -139,13 +142,28 @@ class ddb{
 	}
 
 
+
 	int countkeys(){
 		// return the lenght of databae keys
 		JSONValue j = parseJSON(dbdata);
 		return to!int(j.object.keys.length);
-
 	}
-	
+
+
+
+	ulong count(string key){
+		JSONValue j = parseJSON(dbdata);
+		if(havekey(key)){
+			// case json array 
+			if(j[key].type == JSON_TYPE.ARRAY) {
+				return j[key].array.length;
+			}
+		}
+		return 0;
+	}
+
+
+
 	int getsize(){
 		// return database size in bytes
 		if(exists(db)){
@@ -154,7 +172,9 @@ class ddb{
 			throw new Exception("Error: Unable to get database size, database not exists");
 		}
 	}
-	
+
+
+
 	void drop(){
 		// Drop database
 		if(exists(db)){
@@ -165,9 +185,39 @@ class ddb{
 	}
 
 
-	bool have(string key){
+
+	bool havekey(string key){
 		// return true if key exists false if not
 		JSONValue j = parseJSON(dbdata);
 		return((key in j) != null);
+	}
+
+
+
+	bool havevalue(string key, string value){
+		JSONValue j = parseJSON(dbdata);
+
+		if(havekey(key)){
+			if(j[key].type == JSON_TYPE.ARRAY){
+				foreach(Key; j[key].array)
+				{ 
+					if (Key.str == value){
+						return true;
+					}
+				}
+                
+				return false;
+			}
+
+			else{
+
+				if(j[key].str == value){
+					return true;
+				}
+				return false;
+			}
+		}
+
+		return false;
 	}
 }
