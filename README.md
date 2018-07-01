@@ -12,44 +12,53 @@
 import std.stdio;
 import dddb;
 
-void main() {
-
-	auto db = new ddb("test.db");
-
-        // set facebook value to fb 
-	db.set("facebook", "fb");
-	// set instagram value to insta
-	db.set("instagram", "insta");
-
-        // get facebook value
-	writeln(db.get("facebook")); // fb
-	// get instagram value
-	writeln(db.get("instagram")); // insta
-
-        // assertions
-	assert(db.get("facebook") == "fb");
-	assert(db.get("instagram") == "insta");
+void main()
+{
+	
+	auto db = new ddb("yes.db");
     
 
-        // update facebook value to ffb
-	db.update("facebook", "ffb");
-	writeln(db.get("facebook")); // ffb
+    // set multiple values to social_networks
+    db.set("social_networks", "facebook");
+    db.set("social_networks", "twitter");
+    db.set("social_networks", "linkedin");
 
-        // db.getkeys() return a list of all keys 
-	writeln(db.getkeys()); 
-	
-	// db.countkeys() return the lenght of databae keys
-	assert(db.countkeys() == 2);
-	writeln(db.countkeys()); // 2
-	
-	assert(db.getsize() == 38);
-	// db.getsize() return the database size in bytes
-	writeln(db.getsize()); // 38
-	
-	// db.drop() delete database 
-	// NOTE: all db data will be lost
-	db.drop();
-	assert(exists(db.db) == false);
-	
-	
+    writeln(db.get("social_networks"));
+    // ["facebook", "twitter", "linkedin"]
+
+    writeln(db.count("social_networks"));
+    // will return 3, because we have add ["facebook", "twitter", "linkedin"]
+
+    assert(db.count("social_networks") == 3);
+    // no error because there are 3 ["facebook", "twitter", "linkedin"]
+
+    db.update("social_networks", "facebook", "instagram");
+    // update facebook to instagram 
+    writeln(db.get("social_networks"));
+    // ["instagram", "twitter", "linkedin"]
+
+    assert(db.countkeys() == 1);
+    writeln(db.getkeys()); 
+    // db.getkeys() return a list of all keys,
+    // ["social_networks"]
+
+    assert(db.getsize() == 54);
+    writeln(db.getsize());
+    // db.getsize() return the database size in bytes
+    // 58
+    
+
+    assert(db.havevalue("social_networks", "facebook") == false);
+    writeln(db.havevalue("social_networks", "facebook")); // expected false
+    // because facebook not exists in social_networks, we update it with instagram in line 240
+
+    assert(db.havevalue("social_networks", "instagram") == true);
+    writeln(db.havevalue("social_networks", "instagram")); // expected true 
+    // true 
+
+
+    // db.drop() delete database 
+    // NOTE: all db data will be lost
+    db.drop();
+    assert(exists(db.db) == false);
 }
