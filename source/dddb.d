@@ -10,7 +10,8 @@ import std.json;
 
 class ddb{
 
-
+    
+    JSONValue j;
 	string dbdata;
 	string db;
 	
@@ -24,7 +25,7 @@ class ddb{
 
 	    } else{
 	    	// db not exists, init null db
-	    	dbdata = "{}";
+	    	j = parseJSON("{}");
 	    }
 	}
 
@@ -33,15 +34,15 @@ class ddb{
 	void load(){
 		// load db contents
 		File file = File(db, "r");
-	    dbdata = file.readln(); 
+	    j = parseJSON(file.readln());
 	}
 
 
 
-	void save(JSONValue data){
+	void save(){
 		// save 
 		File file = File(db, "w+");
-		file.write(data);
+		file.write(j);
 		file.close();
 		load(); // load with the new objects
 	}
@@ -50,8 +51,6 @@ class ddb{
 
 	string get(string key){
 		// return the value of specifiec key
-		JSONValue j = parseJSON(dbdata);
-
 		if(havekey(key)){
 			if(j[key].type == JSON_TYPE.ARRAY) {
 			   // case is array, return an array of values
@@ -69,12 +68,10 @@ class ddb{
 
 	void set(string key, string value){
 		// set value to specifiec key
-        JSONValue j = parseJSON(dbdata);
-
         if(!havekey(key)){
         	// case key not exists
         	j.object[key] = value;
-        	save(j);
+        	save();
         }else{
 
         	if(j[key].type == JSON_TYPE.ARRAY) {
@@ -86,10 +83,10 @@ class ddb{
         		}
 
 			    JSONValue([j[key].array ~= JSONValue(value)]);
-				save(j);
+				save();
 			}else{
 				j.object[key] = JSONValue([j[key].str, value]);
-				save(j);	
+				save();	
 			}
         }
 	}
@@ -98,8 +95,6 @@ class ddb{
 
 	void update(string key, string value, string newvalue = ""){
 		// update an already existed key value with new value
-		JSONValue j = parseJSON(dbdata);
-
 		bool VAalueExists;
 		int line = 0;
 
@@ -118,14 +113,14 @@ class ddb{
 
 				if(VAalueExists){
 					j[key][line].str = newvalue;
-					save(j);
+					save();
 				}
 			    else{
 					throw new Exception("Error: Unable to update value wich not exists");
 				}
 			}else{
 				j[key].str = value;
-				save(j);
+				save();
 			}			
 		}
 		else{
@@ -137,7 +132,6 @@ class ddb{
 
 	string[] getkeys(){
 		// get keys 
-		JSONValue j = parseJSON(dbdata);
 		return(j.object.keys);
 	}
 
@@ -145,14 +139,12 @@ class ddb{
 
 	int countkeys(){
 		// return the lenght of databae keys
-		JSONValue j = parseJSON(dbdata);
 		return to!int(j.object.keys.length);
 	}
 
 
 
 	ulong count(string key){
-		JSONValue j = parseJSON(dbdata);
 		if(havekey(key)){
 			// case json array 
 			if(j[key].type == JSON_TYPE.ARRAY) {
@@ -188,15 +180,12 @@ class ddb{
 
 	bool havekey(string key){
 		// return true if key exists false if not
-		JSONValue j = parseJSON(dbdata);
 		return((key in j) != null);
 	}
 
 
 
 	bool havevalue(string key, string value){
-		JSONValue j = parseJSON(dbdata);
-
 		if(havekey(key)){
 			if(j[key].type == JSON_TYPE.ARRAY){
 				foreach(Key; j[key].array)
