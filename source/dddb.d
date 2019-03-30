@@ -8,27 +8,21 @@ import std.file;
 import std.json;
 
 
-class ddb{
-
-    
-    JSONValue j;
+class ddb {    
+   	JSONValue j;
 	string dbdata;
-	string db;
-	
+	string db;	
 
 	this(string dbfile){
 		db = dbfile;
 	    // :dbfile database filename
-	    if(exists(dbfile)) {
+	    if(exists(dbfile))
 	    	// already have dbfile load it 
 	    	load();
-
-	    } else{
+		else
 	    	// db not exists, init null db
 	    	j = parseJSON("{}");
-	    }
 	}
-
 
 
 	void load(){
@@ -36,7 +30,6 @@ class ddb{
 		File file = File(db, "r");
 	    j = parseJSON(file.readln());
 	}
-
 
 
 	void save(){
@@ -47,44 +40,42 @@ class ddb{
 		load(); // load with the new objects
 	}
 
-
-
+	
 	string get(string key){
 		// return the value of specifiec key
-		if(havekey(key)){
-			if(j[key].type == JSON_TYPE.ARRAY) {
+		if(havekey(key)) {
+			if(j[key].type == JSON_TYPE.ARRAY)
 			   // case is array, return an array of values
 				return to!string((j[key].array));
-			}else{
+			else
 				return j[key].str;
-			}
-		} 
-		else{
-			throw new Exception("Error: key not exists");
-		}			
+		}
+		else
+			throw new Exception("Error: key not exists");			
 	}
 
 
 
 	void set(string key, string value){
 		// set value to specifiec key
-        if(!havekey(key)){
+        if(!havekey(key)) {
         	// case key not exists
         	j.object[key] = value;
         	save();
-        }else{
-
+        }
+		else {
         	if(j[key].type == JSON_TYPE.ARRAY) {
         		// check if already exists 
-        		foreach(Key; j[key].array){
-        			if(Key.str == value){
-        				throw new Exception("Error: value already exists exists");
+        		foreach(Key; j[key].array) {
+        			if(Key.str == value) {
+        				throw new Exception("Error: value already exists.");
         			}
         		}
 
 			    JSONValue([j[key].array ~= JSONValue(value)]);
 				save();
-			}else{
+			}
+			else {
 				j.object[key] = JSONValue([j[key].str, value]);
 				save();	
 			}
@@ -93,17 +84,16 @@ class ddb{
 
 
 
-	void update(string key, string value, string newvalue = ""){
+	void update(string key, string value, string newvalue = "") {
 		// update an already existed key value with new value
 		bool VAalueExists;
 		int line = 0;
 
-		if(havekey(key)){
+		if(havekey(key)) {
 			// case json array 
 			if(j[key].type == JSON_TYPE.ARRAY) {
-				foreach(Key; j[key].array)
-				{   
-					if (Key.str == value){
+				foreach(Key; j[key].array) {   
+					if (Key.str == value) {
 						VAalueExists = true;
 						break;
 					}
@@ -111,21 +101,20 @@ class ddb{
 					line ++;
 				}
 
-				if(VAalueExists){
+				if(VAalueExists) {
 					j[key][line].str = newvalue;
 					save();
 				}
-			    else{
-					throw new Exception("Error: Unable to update value wich not exists");
-				}
-			}else{
+			    else
+					throw new Exception("Error: Unable to update value witch does not exists.");
+			}
+			else {
 				j[key].str = value;
 				save();
-			}			
+			}		
 		}
-		else{
-			throw new Exception("Error: Unable to update key wich not already exists");
-		}	
+		else
+			throw new Exception("Error: Unable to update key witch does not already exists.");
 	}
 
 
@@ -145,40 +134,37 @@ class ddb{
 
 
 	ulong count(string key){
-		if(havekey(key)){
+		if(havekey(key)) {
 			// case json array 
-			if(j[key].type == JSON_TYPE.ARRAY) {
+			if(j[key].type == JSON_TYPE.ARRAY)
 				return j[key].array.length;
-			}
 		}
 		return 0;
 	}
 
 
 
-	int getsize(){
+	int getsize() {
 		// return database size in bytes
-		if(exists(db)){
+		if(exists(db))
 			return to!int(getSize(db));
-		} else{
-			throw new Exception("Error: Unable to get database size, database not exists");
-		}
+		else
+			throw new Exception("Error: Unable to get database size, database does not exists.");
 	}
 
 
 
 	void drop(){
 		// Drop database
-		if(exists(db)){
+		if(exists(db))
 			remove(db);
-		} else{
-			throw new Exception("Error: Unable to drop a non-existed database");
-		}
+		else 
+			throw new Exception("Error: Unable to drop a non-existing database");
 	}
 
 
 
-	bool havekey(string key){
+	bool havekey(string key) {
 		// return true if key exists false if not
 		return((key in j) != null);
 	}
@@ -186,27 +172,18 @@ class ddb{
 
 
 	bool havevalue(string key, string value){
-		if(havekey(key)){
-			if(j[key].type == JSON_TYPE.ARRAY){
-				foreach(Key; j[key].array)
-				{ 
-					if (Key.str == value){
+		if(havekey(key)) {
+			if(j[key].type == JSON_TYPE.ARRAY) {
+				foreach(Key; j[key].array) { 
+					if (Key.str == value)
 						return true;
-					}
-				}
-                
+				}            
 				return false;
 			}
-
-			else{
-
-				if(j[key].str == value){
-					return true;
-				}
-				return false;
-			}
+			else
+				return j[key].str == value;
 		}
-
-		return false;
+		else
+			return false;
 	}
 }
