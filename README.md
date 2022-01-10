@@ -20,9 +20,11 @@ void main()
    // open a connection to database
    auto db = new ddb("test.db");
    // set value to specific key
-   db.set("hello", "world");
+   db.set("hello", "world"); // true
    // read the value of the specific key
    writeln(db.get("hello")); // world
+   // save to database
+   db.commit(); // True
 }
 
 
