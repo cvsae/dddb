@@ -8,7 +8,7 @@ import std.file;
 import std.json;
 
 
-class dddb {
+class ddb {
 
    	JSONValue j;
 	string dbdata;
