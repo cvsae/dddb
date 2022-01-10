@@ -8,13 +8,16 @@ import std.file;
 import std.json;
 
 
-class ddb {    
+class dddb {
+
    	JSONValue j;
 	string dbdata;
 	string db;	
+	bool autocommit;
 
-	this(string dbfile){
+	this(string dbfile, bool autoDump=false){
 		db = dbfile;
+		autocommit = autoDump;
 	    // :dbfile database filename
 	    if(exists(dbfile))
 	    	// already have dbfile load it 
@@ -32,8 +35,17 @@ class ddb {
 	}
 
 
-	void save(){
-		// save 
+
+	void autoCommit()
+	{
+		// Write/save the json dump into the file if auto_commit is enabled
+		if (autocommit)
+			commit();
+	}
+
+
+	void commit(){
+		// commit 
 		File file = File(db, "w+");
 		file.write(j);
 		file.close();
@@ -44,7 +56,7 @@ class ddb {
 	string get(string key){
 		// return the value of specifiec key
 		if(havekey(key)) {
-			if(j[key].type == JSON_TYPE.ARRAY)
+			if(j[key].type == JSONType.ARRAY)
 			   // case is array, return an array of values
 				return to!string((j[key].array));
 			else
@@ -56,15 +68,16 @@ class ddb {
 
 
 
-	void set(string key, string value){
+	bool set(string key, string value){
 		// set value to specifiec key
         if(!havekey(key)) {
         	// case key not exists
         	j.object[key] = value;
-        	save();
+        	autoCommit();
+        	return true;
         }
 		else {
-        	if(j[key].type == JSON_TYPE.ARRAY) {
+        	if(j[key].type == JSONType.ARRAY) {
         		// check if already exists 
         		foreach(Key; j[key].array) {
         			if(Key.str == value) {
@@ -73,44 +86,48 @@ class ddb {
         		}
 
 			    JSONValue([j[key].array ~= JSONValue(value)]);
-				save();
+				autoCommit();
+				return true;
 			}
 			else {
 				j.object[key] = JSONValue([j[key].str, value]);
-				save();	
+				autoCommit();	
+				return true;
 			}
         }
+
+        return false;
 	}
 
 
 
 	void update(string key, string value, string newvalue = "") {
 		// update an already existed key value with new value
-		bool VAalueExists;
+		bool ValueExists;
 		int line = 0;
 
 		if(havekey(key)) {
 			// case json array 
-			if(j[key].type == JSON_TYPE.ARRAY) {
+			if(j[key].type == JSONType.ARRAY) {
 				foreach(Key; j[key].array) {   
 					if (Key.str == value) {
-						VAalueExists = true;
+						ValueExists = true;
 						break;
 					}
 
 					line ++;
 				}
 
-				if(VAalueExists) {
+				if(ValueExists) {
 					j[key][line].str = newvalue;
-					save();
+					commit();
 				}
 			    else
 					throw new Exception("Error: Unable to update value witch does not exists.");
 			}
 			else {
 				j[key].str = value;
-				save();
+				commit();
 			}		
 		}
 		else
@@ -136,7 +153,7 @@ class ddb {
 	ulong count(string key){
 		if(havekey(key)) {
 			// case json array 
-			if(j[key].type == JSON_TYPE.ARRAY)
+			if(j[key].type == JSONType.ARRAY)
 				return j[key].array.length;
 		}
 		return 0;
@@ -154,12 +171,18 @@ class ddb {
 
 
 
-	void drop(){
+	bool drop()
+	{
 		// Drop database
-		if(exists(db))
+		if(exists(db)){
 			remove(db);
-		else 
-			throw new Exception("Error: Unable to drop a non-existing database");
+		    return true;
+
+		}
+			
+		else{
+			return false;
+		}
 	}
 
 
@@ -173,7 +196,7 @@ class ddb {
 
 	bool havevalue(string key, string value){
 		if(havekey(key)) {
-			if(j[key].type == JSON_TYPE.ARRAY) {
+			if(j[key].type == JSONType.ARRAY) {
 				foreach(Key; j[key].array) { 
 					if (Key.str == value)
 						return true;
