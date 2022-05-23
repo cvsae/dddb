@@ -11,11 +11,11 @@ import std.json;
 class ddb {
 
    	JSONValue j;
-	string dbdata;
 	string db;	
 	bool autocommit;
 
-	this(string dbfile, bool autoDump=false){
+	this(string dbfile, bool autoDump=false)
+	{
 		db = dbfile;
 		autocommit = autoDump;
 	    // :dbfile database filename
@@ -28,7 +28,8 @@ class ddb {
 	}
 
 
-	void load(){
+	void load()
+	{
 		// load db contents
 		File file = File(db, "r");
 	    j = parseJSON(file.readln());
@@ -44,7 +45,8 @@ class ddb {
 	}
 
 
-	void commit(){
+	void commit()
+	{
 		// commit 
 		File file = File(db, "w+");
 		file.write(j);
@@ -53,9 +55,11 @@ class ddb {
 	}
 
 	
-	string get(string key){
+	string get(string key)
+	{
 		// return the value of specifiec key
-		if(havekey(key)) {
+		if(havekey(key))
+		{
 			if(j[key].type == JSONType.ARRAY)
 			   // case is array, return an array of values
 				return to!string((j[key].array));
@@ -68,20 +72,24 @@ class ddb {
 
 
 
-	bool set(string key, string value){
+	bool set(string key, string value)
+	{
 		// set value to specifiec key
-        if(!havekey(key)) {
+        if(!havekey(key))
+        {
         	// case key not exists
         	j.object[key] = value;
         	autoCommit();
         	return true;
         }
 		else {
-        	if(j[key].type == JSONType.ARRAY) {
+        	if(j[key].type == JSONType.ARRAY) 
+        	{
         		// check if already exists 
-        		foreach(Key; j[key].array) {
+        		foreach(Key; j[key].array) 
+        		{
         			if(Key.str == value) {
-        				throw new Exception("Error: value already exists.");
+        				return true;
         			}
         		}
 
@@ -90,6 +98,7 @@ class ddb {
 				return true;
 			}
 			else {
+				writeln("here");
 				j.object[key] = JSONValue([j[key].str, value]);
 				autoCommit();	
 				return true;
@@ -101,57 +110,63 @@ class ddb {
 
 
 
-	void update(string key, string value, string newvalue = "") {
+	bool update(string key, string value, string newvalue = "") 
+	{
 		// update an already existed key value with new value
 		bool ValueExists;
 		int line = 0;
 
-		if(havekey(key)) {
+		if(havekey(key)) 
+		{
 			// case json array 
-			if(j[key].type == JSONType.ARRAY) {
-				foreach(Key; j[key].array) {   
-					if (Key.str == value) {
-						ValueExists = true;
-						break;
+			if(j[key].type == JSONType.ARRAY) 
+			{
+				foreach(Key; j[key].array) 
+				{   
+					if (Key.str == value) 
+					{
+						j[key][line].str = newvalue;
+						commit();
+
+						return true;
 					}
 
 					line ++;
 				}
 
-				if(ValueExists) {
-					j[key][line].str = newvalue;
-					commit();
-				}
-			    else
-					throw new Exception("Error: Unable to update value witch does not exists.");
 			}
 			else {
 				j[key].str = value;
-				commit();
+				return true;
 			}		
 		}
-		else
-			throw new Exception("Error: Unable to update key witch does not already exists.");
+		
+
+		return false;
 	}
 
 
 
-	string[] getkeys(){
+	string[] getkeys()
+	{
 		// get keys 
 		return(j.object.keys);
 	}
 
 
 
-	int countkeys(){
+	int countkeys()
+	{
 		// return the lenght of databae keys
 		return to!int(j.object.keys.length);
 	}
 
 
 
-	ulong count(string key){
-		if(havekey(key)) {
+	ulong count(string key)
+	{
+		if(havekey(key)) 
+		{
 			// case json array 
 			if(j[key].type == JSONType.ARRAY)
 				return j[key].array.length;
@@ -161,7 +176,8 @@ class ddb {
 
 
 
-	int getsize() {
+	int getsize() 
+	{
 		// return database size in bytes
 		if(exists(db))
 			return to!int(getSize(db));
@@ -174,39 +190,72 @@ class ddb {
 	bool drop()
 	{
 		// Drop database
-		if(exists(db)){
+		if(exists(db))
+		{
 			remove(db);
 		    return true;
 
 		}
 			
-		else{
+		else {
 			return false;
 		}
 	}
 
 
 
-	bool havekey(string key) {
+	bool havekey(string key) 
+	{
 		// return true if key exists false if not
 		return((key in j) != null);
 	}
 
 
 
-	bool havevalue(string key, string value){
-		if(havekey(key)) {
-			if(j[key].type == JSONType.ARRAY) {
-				foreach(Key; j[key].array) { 
+	bool havevalue(string key, string value)
+	{
+		if(havekey(key)) 
+		{
+			if(j[key].type == JSONType.ARRAY) 
+			{
+				foreach(Key; j[key].array) 
+				{ 
 					if (Key.str == value)
 						return true;
 				}            
 				return false;
 			}
-			else
+			else {
 				return j[key].str == value;
+			}
 		}
-		else
+		else {
 			return false;
+		}
+	}
+
+
+
+	bool remove(string key)
+	{
+		JSONValue updatedJson;
+
+		if(havekey(key))
+		{
+			updatedJson = parseJSON("{}");
+
+			foreach (string _key, ref value; j)
+			{
+	            if (_key != key) 
+	            {
+	                updatedJson[_key] = value;
+	            }
+	        }
+
+	        j = updatedJson;
+            commit();
+	    }
+
+	    return havekey(key) == false;
 	}
 }

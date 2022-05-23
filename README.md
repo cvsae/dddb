@@ -23,6 +23,8 @@ void main()
    db.set("hello", "world"); // true
    // read the value of the specific key
    writeln(db.get("hello")); // world
+   writeln(db.remove("hello")); // true
+   writeln(db.get("hello")); // Error: key not exists
    // save to database
    db.commit(); // True
 }
@@ -38,6 +40,7 @@ void main()
 * GETKEYS → Return all values from database |→ Return Array
 * HAVEVALUE key VALUE → Determine if the value exists in the given key |→ Return Boolean
 * HAVEKEY key → Determine if the key exists |→ Return Boolean
+* REMOVE key → Remove the key from database |→ Return Boolean
 * COUNTKEYS → Return the length of keys |→ Return Integer
 * GETSIZE → Return the size of database (bytes) |→ Return Integer
 * DROP → Delete everything from the database |→ Return Boolean
